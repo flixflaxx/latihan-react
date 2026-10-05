@@ -1,121 +1,131 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
+import { produk } from './data/produk'
+import Card from './components/Card'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [filter, setFilter] = useState('all') // 'all', 'ready', 'out'
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const filteredProduk = produk.filter((item) => {
+    const matchesSearch = item.nama.toLowerCase().includes(searchTerm.toLowerCase())
+    if (filter === 'ready') return matchesSearch && item.stok > 0
+    if (filter === 'out') return matchesSearch && item.stok === 0
+    return matchesSearch
+  })
+
+  const totalProduk = produk.length
+  const totalTersedia = produk.filter((p) => p.stok > 0).length
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-container">
+      {/* Header Section */}
+      <header className="catalog-header">
+        <div className="header-badge">✨ Koleksi Terbaru</div>
+        <h1 className="catalog-title">Katalog Produk</h1>
+        <p className="catalog-subtitle">
+          Temukan berbagai pilihan produk berkualitas dengan penawaran dan harga terbaik.
+        </p>
 
-      <div className="ticks"></div>
+        {/* Quick Stats */}
+        <div className="stats-row">
+          <div className="stat-pill">
+            <span className="stat-num">{totalProduk}</span>
+            <span className="stat-text">Total Item</span>
+          </div>
+          <div className="stat-pill stat-ready">
+            <span className="stat-num">{totalTersedia}</span>
+            <span className="stat-text">Tersedia</span>
+          </div>
+          <div className="stat-pill stat-out">
+            <span className="stat-num">{totalProduk - totalTersedia}</span>
+            <span className="stat-text">Habis</span>
+          </div>
+        </div>
+      </header>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
+      {/* Filter & Search Bar */}
+      <div className="catalog-controls">
+        <div className="search-box">
+          <svg
+            className="search-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Cari nama produk..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={() => setSearchTerm('')}
+              title="Hapus pencarian"
+            >
+              ×
+            </button>
+          )}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <div className="filter-tabs">
+          <button
+            className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+            onClick={() => setFilter('all')}
+          >
+            Semua ({totalProduk})
+          </button>
+          <button
+            className={`filter-btn ${filter === 'ready' ? 'active' : ''}`}
+            onClick={() => setFilter('ready')}
+          >
+            Tersedia ({totalTersedia})
+          </button>
+          <button
+            className={`filter-btn ${filter === 'out' ? 'active' : ''}`}
+            onClick={() => setFilter('out')}
+          >
+            Habis ({totalProduk - totalTersedia})
+          </button>
+        </div>
+      </div>
+
+      {/* Product List Grid */}
+      {filteredProduk.length > 0 ? (
+        <div className="list">
+          {filteredProduk.map((p) => (
+            <Card
+              key={p.id}
+              nama={p.nama}
+              harga={p.harga}
+              stok={p.stok}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <h3>Produk Tidak Ditemukan</h3>
+          <p>Coba gunakan kata kunci lain atau ubah filter pencarian.</p>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="catalog-footer">
+        <p>© 2026 Toko Katalog • Dibuat dengan React & Vite</p>
+      </footer>
+    </div>
   )
 }
 
